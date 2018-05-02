@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>SetCover Problem</title>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css">
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/2.2.0/anime.js"></script>
+<link rel="stylesheet" href="style.css">
+<script src="script.js"></script>
+</head>
+<body>
+    <h1 class="main-heading">SET COVER PROBLEM</h1>
+
+    <div class="row">
+        <div class="col">
+        <div id="uniset" class="form-group">
+          <input class="form-control set-inputs"
+            v-model="newUniset"
+            v-on:keyup.enter="addUniset"
+            placeholder="Enter Universal Set"
+          >
+            <p id="uniset-cls" class="uniset-cls" v-for="set in uniset">{{ set.data }}</p>
+        </div>
+    </div>
+
+        <div class="col">
+        <div id="subsets" class="form-group">
+          <input class="form-control set-inputs"
+            v-model="newSubset"
+            v-on:keyup.enter="addNewSubset"
+            placeholder="Enter Subsets"
+          >
+            <p class="subsets-cls" v-bind:id="index" v-for="(subset,index) in subsets">{{ subset.data }} </p>
+        </div>
+        </div>
+        <div class="col">
+            <h2 class="subsets-heading mid-head">INTERMEDIATE SELECTION</h2>
+        </div>
+        <div class="col">
+                <h2 class="subsets-heading">FINAL SUBSETS</h2>
+        </div>
+
+    </div>
+
+<script>
+
+
+var subsets_list = [];
+var universalSet = [];
+var answer = [];
+var anpos = [];
+var universalSet_3 = [];
+var midtran = [];
+var completedElements = [];
+var n;
+
+var vueinst = new Vue({
+  el: '#subsets',
+  data: {
+    newSubset: '',
+    subsets: []
+  },
+  methods: {
+    addNewSubset: function () {
+      this.subsets.push({
+        data: this.newSubset
+      })
+      subsets_list.push(this.newSubset.split(',').map(Number))
+      this.newSubset = ''
+    }
+
+  }
+})
+
+var unisetVue = new Vue({
+
+    el: '#uniset',
+    data:{
+        newUniset: '',
+        uniset: []
+    },
+    methods:{
+
+        addUniset: function(){
+            this.uniset.push(
+                {
+                    data: this.newUniset
+                })
+                var arr = this.newUniset.split(',').map(Number)
+                for(var i=0;i<arr.length;i++){
+
+                    universalSet.push(arr[i])
+                }
+                 
+                this.newUniset = ''
+
+        }
+    }
+})
+
+var common = function(a,b){
+
+    var result = [];
+
+    for(var i=0;i<a.length;i++){
+
+        for(var j=0;j<b.length;j++){
+
+            if(a[i] === b[j]){
+                result.push(a[i]);
+                break;
+            }
+        }
+    }
+    return result;
+}
+
+
+
+var algo = function ()
+{
+    var subsets_list_2;
+    var count;
+    var position_2;
+    var universalSet_2;
+    var position;
+    var subcount;
+
+    count = 0;
+    subsets_list_2 = subsets_list.slice();
+    universalSet_2 = universalSet.slice();
+    subcount = subsets_list.length;
+    n = universalSet.length;
+
+
+    while(count < n){
+
+        var clen = 0;
+        var pos = 0;
+        console.log("Subset count: " + subsets_list.length);
+        var midd = [];
+        for(var i=0;i<subsets_list.length;i++){
+
+            var common_elements = common(universalSet,subsets_list[i]);
+            var tlen = (common_elements.length);
+            console.log(tlen);
+
+            if(clen < tlen){
+                clen = tlen;
+                pos = i;
+                midd.push(subsets_list_2.indexOf(subsets_list[pos]));
+            }
+            
+        }
+        midtran.push(midd);
+        position = pos;
+        console.log("postion "+position);        
+        console.log("Subset value" + subsets_list[pos]);
+        if(pos > -1){
+          position_2 = subsets_list_2.indexOf(subsets_list[pos]);
+        }
+        console.log("postion2 "+position_2);
+        temp = common(universalSet,subsets_list[pos]);
+        console.log(temp)
+        answer.push(subsets_list[pos]);
+        subsets_list = []
+        for(var i=0;i<subsets_list_2.length;i++){
+
+            if(i!=pos){
+                
+                subsets_list.push(subsets_list_2[i]);
+            }
+
+        }
+        
+        for(var i=0;i<clen;i++){
+            universalSet=[]
+            for(var j=0;j<universalSet_2.length;j++)
+            {
+                var flag=0;
+                for(var k=0;k<temp.length;k++)
+                {
+                    if(universalSet_2[j]==temp[k])
+                    {
+                        flag=1;
+                    }
+                }
+                if(flag==0)
+                {
+                    universalSet.push(universalSet_2[j]);
+                }
+            }
+            
+            count++;
+        }
+        
+        universalSet_2 = universalSet.slice();
+        universalSet_3.push(universalSet_2);
+
+       
+        console.log(universalSet);
+        anpos.push(position_2);
+        completedElements.push(count);
+        console.log("Count" + count);
+    
+    }
+}
+
+
+
+var count1=0;
+var count2=0;
+var count3=0;
+document.querySelector('html').onkeyup = function(e){
+
+    e.preventDefault();
+    
+    if(e.keyCode == 32){
+        if(count1==0)
+        {
+            algo();
+            count1++;
+        }
+        if(count2<anpos.length)
+        {
+            console.log("midtran: "+midtran[count2]);
+            if(count3<midtran[count2].length)
+            {
+                if(count3!=0)
+                {
+                    var box = anime({
+                    targets: [document.getElementById(midtran[count2][count3-1].toString())],
+                    translateX:{
+                        value: 0,
+                        duration: 1000
+                    }
+                    })
+                    console.log("back"+midtran[count2][count3-1]);
+                }
+                var box = anime({
+                targets: [document.getElementById(midtran[count2][count3].toString())],
+                translateX:{
+                    value: 500,
+                    duration: 1000
+                }
+                })
+                console.log("mid"+midtran[count2][count3]);
+                count3++;
+            }
+            
+            if(count3==midtran[count2].length+1){ 
+                var x;
+                var y = anpos[count2];
+                x=(completedElements[count2]/n)*100;
+                var box = anime({
+                targets: [document.getElementById(anpos[count2].toString())],
+                translateX:{
+                    value: 850,
+                    duration: 1000
+                }
+                }).finished.then(()=>{
+
+                    $('#'+y).css('background','linear-gradient(to right,  #ade89b 0%,#ade89b '+x+'%,#ade89b '+x+'%,#ade89b 100%)');
+                    
+                    $('#uniset-cls').css('background','linear-gradient(to right,  #ade89b 0%,#ade89b '+x+'%,#f26060 '+x+'%,#f26060 100%)');
+                })
+                console.log("front"+midtran[count2][count3-1]);
+                count2++;
+                count3=0;
+            }
+            if(count3 == midtran[count2].length)
+            {
+                count3++;
+            }
+       
+      }    
+    }
+}
+
+</script>
+</body>
+</html>
